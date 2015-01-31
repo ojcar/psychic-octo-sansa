@@ -1,14 +1,12 @@
 class PrimeTable
-  def initialize(n)
-    raise ArgumentError.new("Invalid number. Please use positive numbers.") if n < 0
+  attr_accessor :n
 
+  def initialize(n=10)
     @n = n
   end
 
   def primes
-    return @primes if defined?(@primes)
-    
-    @primes = sieve
+    get_primes_with_sieve
   end
 
   def print
@@ -20,9 +18,7 @@ class PrimeTable
 
   private
   def table
-    return @table if defined?(@table)
-    
-    @table = [[""].concat(primes)] + primes.map do |i|
+    [[""].concat(primes)] + primes.map do |i|
       [i] + primes.map {|j| i * j }
     end
   end
@@ -39,7 +35,7 @@ class PrimeTable
 
   # just look at all the numbers up to an upper bound
   # ok for small numbers, gets slow very quickly
-  def brute
+  def get_primes_with_list
     (2..upper_bound).reject do |i|
       (2...i).any? {|j| i % j == 0 }
     end.take(@n)
@@ -47,24 +43,22 @@ class PrimeTable
 
   # the sieve of Eratosthenes algorithm
   # better handling of large numbers
-  def sieve
-    numbers = [nil,nil] + (2..upper_bound).to_a
+  def get_primes_with_sieve
+    result = [nil,nil] + (2..upper_bound).to_a
 
     (2..Math.sqrt(upper_bound)).each do |i|
-      (i**2..upper_bound).step(i) {|j| numbers[j] = nil }
+      (i**2..upper_bound).step(i) {|j| result[j] = nil }
     end
     
-    numbers.compact.take(@n)
+    result.compact.take(@n)
   end
 end
 
-
 if __FILE__== $0
-  if ARGV.length != 1
-    puts "Usage: ruby prime_table.rb 10"
-    exit
-  else
+  if ARGV.length == 1
     n = ARGV[0].to_i
     PrimeTable.new(n).print
+  else
+    PrimeTable.new.print
   end
 end
